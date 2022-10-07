@@ -1,1 +1,35 @@
-##Neural Machine Translation by Jointly Learning to Align and Translate
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "# 3 - Neural Machine Translation by Jointly Learning to Align and Translate\n",
+    "\n",
+    "In this third notebook on sequence-to-sequence models using PyTorch and TorchText, we'll be implementing the model from [Neural Machine Translation by Jointly Learning to Align and Translate](https://arxiv.org/abs/1409.0473). This model achives our best perplexity yet, ~27 compared to ~34 for the previous model.\n",
+    "\n",
+    "## Introduction\n",
+    "\n",
+    "As a reminder, here is the general encoder-decoder model:\n",
+    "\n",
+    "![](assets/seq2seq1.png)\n",
+    "\n",
+    "In the previous model, our architecture was set-up in a way to reduce \"information compression\" by explicitly passing the context vector, $z$, to the decoder at every time-step and by passing both the context vector and embedded input word, $d(y_t)$, along with the hidden state, $s_t$, to the linear layer, $f$, to make a prediction.\n",
+    "\n",
+    "![](assets/seq2seq7.png)\n",
+    "\n",
+    "Even though we have reduced some of this compression, our context vector still needs to contain all of the information about the source sentence. The model implemented in this notebook avoids this compression by allowing the decoder to look at the entire source sentence (via its hidden states) at each decoding step! How does it do this? It uses *attention*. \n",
+    "\n",
+    "Attention works by first, calculating an attention vector, $a$, that is the length of the source sentence. The attention vector has the property that each element is between 0 and 1, and the entire vector sums to 1. We then calculate a weighted sum of our source sentence hidden states, $H$, to get a weighted source vector, $w$. \n",
+    "\n",
+    "$$w = \\sum_{i}a_ih_i$$\n",
+    "\n",
+    "We calculate a new weighted source vector every time-step when decoding, using it as input to our decoder RNN as well as the linear layer to make a prediction. We'll explain how to do all of this during the tutorial.\n",
+    "\n",
+    "## Preparing Data\n",
+    "\n",
+    "Again, the preparation is similar to last time.\n",
+    "\n",
+    "First we import all the required modules."
+   ]
+  },
